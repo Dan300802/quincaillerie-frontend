@@ -18,7 +18,15 @@ export default function Login() {
       await login(email, motDePasse)
       navigate('/')
     } catch (err) {
-      setErreur(err.response?.data?.message || 'Erreur de connexion')
+      // Pas de response = requête bloquée (CORS, réseau ou URL API incorrecte)
+      if (!err.response) {
+        const msg = err.code === 'ERR_NETWORK'
+          ? 'Serveur inaccessible. Vérifiez que l’API Railway autorise ce site (CORS) et que l’URL est correcte.'
+          : (err.message || 'Erreur de connexion')
+        setErreur(msg)
+        return
+      }
+      setErreur(err.response?.data?.message || `Erreur ${err.response.status}`)
     } finally {
       setLoading(false)
     }
